@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useCallback } from 'react';
-import { clsx } from 'clsx';
+import clsx from 'clsx';
 
 export interface RangeSliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;

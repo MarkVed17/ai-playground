@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { clsx } from 'clsx';
+import clsx from 'clsx';
 
 export interface ToggleSwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
   label?: string;
