@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useRef, useEffect } from 'react';
-import { clsx } from 'clsx';
+import clsx from 'clsx';
 
 export interface SelectOption {
   value: string;
