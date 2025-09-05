@@ -63,7 +63,8 @@ export default function GithubRepositoryFinderPage() {
     private: false,
     forked: false,
   });
-  const [sortBy, setSortBy] = useState<(typeof SORT_OPTIONS)[number]["value"]>("stars");
+  const [sortBy, setSortBy] =
+    useState<(typeof SORT_OPTIONS)[number]["value"]>("stars");
   const [minStars, setMinStars] = useState(0);
   const [language, setLanguage] = useState<string>("");
   const [includeArchived, setIncludeArchived] = useState(false);
@@ -73,12 +74,14 @@ export default function GithubRepositoryFinderPage() {
   const [user, setUser] = useState<User | null>(null);
   const [repos, setRepos] = useState<Repo[]>([]);
 
-  const parsedKeywords = useMemo(() =>
-    keywords
-      .split(",")
-      .map((k) => k.trim().toLowerCase())
-      .filter(Boolean),
-  [keywords]);
+  const parsedKeywords = useMemo(
+    () =>
+      keywords
+        .split(",")
+        .map((k) => k.trim().toLowerCase())
+        .filter(Boolean),
+    [keywords]
+  );
 
   const fetchAllRepos = useCallback(async (uname: string) => {
     const base = "https://api.github.com";
@@ -87,9 +90,14 @@ export default function GithubRepositoryFinderPage() {
     const pages = [1, 2];
     const results: Repo[] = [];
     for (const page of pages) {
-      const res = await fetch(`${base}/users/${encodeURIComponent(uname)}/repos?per_page=${perPage}&page=${page}&sort=updated`);
+      const res = await fetch(
+        `${base}/users/${encodeURIComponent(
+          uname
+        )}/repos?per_page=${perPage}&page=${page}&sort=updated`
+      );
       if (!res.ok) {
-        if (res.status === 403) throw new Error("GitHub rate limit reached. Try again later.");
+        if (res.status === 403)
+          throw new Error("GitHub rate limit reached. Try again later.");
         if (res.status === 404) throw new Error("User not found");
         throw new Error(`Failed to fetch repos (${res.status})`);
       }
@@ -100,66 +108,83 @@ export default function GithubRepositoryFinderPage() {
     return results;
   }, []);
 
-  const handleSearch = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username.trim()) return;
-    setLoading(true);
-    setError(null);
-    setUser(null);
-    setRepos([]);
+  const handleSearch = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!username.trim()) return;
+      setLoading(true);
+      setError(null);
+      setUser(null);
+      setRepos([]);
 
-    try {
-      const base = "https://api.github.com";
-      const userRes = await fetch(`${base}/users/${encodeURIComponent(username.trim())}`);
-      if (!userRes.ok) {
-        if (userRes.status === 403) throw new Error("GitHub rate limit reached. Try again later.");
-        if (userRes.status === 404) throw new Error("User not found");
-        throw new Error(`Failed to fetch user (${userRes.status})`);
-      }
-      const userData = (await userRes.json()) as User;
-      setUser(userData);
-
-      const allRepos = await fetchAllRepos(username.trim());
-
-      // Apply filters
-      const filtered = allRepos.filter((r) => {
-        if (!includeArchived && r.archived) return false;
-        if (minStars && (r.stargazers_count || 0) < minStars) return false;
-        if (language && (r.language || "") !== language) return false;
-
-        // Repo type filters
-        const isPublic = !r.private;
-        const typeMatch = (
-          (filters.public && isPublic) ||
-          (filters.private && r.private) ||
-          (filters.forked && r.fork)
+      try {
+        const base = "https://api.github.com";
+        const userRes = await fetch(
+          `${base}/users/${encodeURIComponent(username.trim())}`
         );
-        if (!typeMatch) return false;
-
-        // Keywords in name/description
-        if (parsedKeywords.length) {
-          const hay = `${r.name} ${r.description ?? ""}`.toLowerCase();
-          const anyMatch = parsedKeywords.some((kw) => hay.includes(kw));
-          if (!anyMatch) return false;
+        if (!userRes.ok) {
+          if (userRes.status === 403)
+            throw new Error("GitHub rate limit reached. Try again later.");
+          if (userRes.status === 404) throw new Error("User not found");
+          throw new Error(`Failed to fetch user (${userRes.status})`);
         }
+        const userData = (await userRes.json()) as User;
+        setUser(userData);
 
-        return true;
-      });
+        const allRepos = await fetchAllRepos(username.trim());
 
-      // Sort
-      const sorted = [...filtered].sort((a, b) => {
-        if (sortBy === "stars") return b.stargazers_count - a.stargazers_count;
-        if (sortBy === "forks") return b.forks_count - a.forks_count;
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-      });
+        // Apply filters
+        const filtered = allRepos.filter((r) => {
+          if (!includeArchived && r.archived) return false;
+          if (minStars && (r.stargazers_count || 0) < minStars) return false;
+          if (language && (r.language || "") !== language) return false;
 
-      setRepos(sorted);
-    } catch (err: any) {
-      setError(err?.message || "Unexpected error");
-    } finally {
-      setLoading(false);
-    }
-  }, [username, includeArchived, minStars, language, filters, parsedKeywords, sortBy, fetchAllRepos]);
+          // Repo type filters
+          const isPublic = !r.private;
+          const typeMatch =
+            (filters.public && isPublic) ||
+            (filters.private && r.private) ||
+            (filters.forked && r.fork);
+          if (!typeMatch) return false;
+
+          // Keywords in name/description
+          if (parsedKeywords.length) {
+            const hay = `${r.name} ${r.description ?? ""}`.toLowerCase();
+            const anyMatch = parsedKeywords.some((kw) => hay.includes(kw));
+            if (!anyMatch) return false;
+          }
+
+          return true;
+        });
+
+        // Sort
+        const sorted = [...filtered].sort((a, b) => {
+          if (sortBy === "stars")
+            return b.stargazers_count - a.stargazers_count;
+          if (sortBy === "forks") return b.forks_count - a.forks_count;
+          return (
+            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          );
+        });
+
+        setRepos(sorted);
+      } catch (err: any) {
+        setError(err?.message || "Unexpected error");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      username,
+      includeArchived,
+      minStars,
+      language,
+      filters,
+      parsedKeywords,
+      sortBy,
+      fetchAllRepos,
+    ]
+  );
 
   const handleReset = useCallback(() => {
     setUsername("");
@@ -178,15 +203,24 @@ export default function GithubRepositoryFinderPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
-          <Link href="/" className="text-blue-600 hover:text-blue-800">← Home</Link>
+          <Link href="/" className="text-blue-600 hover:text-blue-800">
+            ← Back to Forms
+          </Link>
         </div>
 
         <div className="bg-white rounded-lg shadow border border-gray-200 p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">GitHub Repository Finder</h1>
-          <p className="text-gray-600 text-sm">Search and filter public repositories for a GitHub user</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            GitHub Repository Finder
+          </h1>
+          <p className="text-gray-600 text-sm">
+            Search and filter public repositories for a GitHub user
+          </p>
         </div>
 
-        <form onSubmit={handleSearch} className="bg-white rounded-lg shadow border border-gray-200 p-6 space-y-6">
+        <form
+          onSubmit={handleSearch}
+          className="bg-white rounded-lg shadow border border-gray-200 p-6 space-y-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <TextInput
               label="GitHub Username"
@@ -215,23 +249,31 @@ export default function GithubRepositoryFinderPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="block text-sm font-medium text-gray-700 mb-2">Repo Type Filters</p>
+              <p className="block text-sm font-medium text-gray-700 mb-2">
+                Repo Type Filters
+              </p>
               <div className="space-y-2">
                 <Checkbox
                   label="Public"
                   checked={filters.public}
-                  onChange={(e) => setFilters((f) => ({ ...f, public: e.target.checked }))}
+                  onChange={(e) =>
+                    setFilters((f) => ({ ...f, public: e.target.checked }))
+                  }
                 />
                 <Checkbox
                   label="Private"
                   checked={filters.private}
-                  onChange={(e) => setFilters((f) => ({ ...f, private: e.target.checked }))}
+                  onChange={(e) =>
+                    setFilters((f) => ({ ...f, private: e.target.checked }))
+                  }
                   description="Note: Private repos require authentication and will not appear for other users"
                 />
                 <Checkbox
                   label="Forked"
                   checked={filters.forked}
-                  onChange={(e) => setFilters((f) => ({ ...f, forked: e.target.checked }))}
+                  onChange={(e) =>
+                    setFilters((f) => ({ ...f, forked: e.target.checked }))
+                  }
                 />
               </div>
             </div>
@@ -241,7 +283,10 @@ export default function GithubRepositoryFinderPage() {
                 name="sortBy"
                 label="Sort Repositories By"
                 orientation="horizontal"
-                options={SORT_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                options={SORT_OPTIONS.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                }))}
                 value={sortBy}
                 onChange={(v) => setSortBy(v as typeof sortBy)}
               />
@@ -265,10 +310,20 @@ export default function GithubRepositoryFinderPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button type="submit" variant="primary" loading={loading} disabled={!username.trim() || loading}>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={loading}
+              disabled={!username.trim() || loading}
+            >
               Search
             </Button>
-            <Button type="button" variant="outline" onClick={handleReset} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleReset}
+              disabled={loading}
+            >
               Reset
             </Button>
           </div>
@@ -283,12 +338,23 @@ export default function GithubRepositoryFinderPage() {
         <div className="mt-6 space-y-4">
           {user && (
             <div className="bg-white rounded-lg shadow border border-gray-200 p-4 flex items-center gap-4">
-              <img src={user.avatar_url} alt={`${user.login} avatar`} className="w-12 h-12 rounded-full border" />
+              <img
+                src={user.avatar_url}
+                alt={`${user.login} avatar`}
+                className="w-12 h-12 rounded-full border"
+              />
               <div className="flex-1">
-                <a href={user.html_url} target="_blank" rel="noreferrer" className="font-semibold text-gray-900 hover:underline">
+                <a
+                  href={user.html_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-gray-900 hover:underline"
+                >
                   {user.name || user.login}
                 </a>
-                <div className="text-sm text-gray-500">Public repos: {user.public_repos}</div>
+                <div className="text-sm text-gray-500">
+                  Public repos: {user.public_repos}
+                </div>
               </div>
             </div>
           )}
@@ -296,26 +362,42 @@ export default function GithubRepositoryFinderPage() {
           <div className="bg-white rounded-lg shadow border border-gray-200">
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Results</h2>
-              <div className="text-sm text-gray-500">{repos.length} repositories</div>
+              <div className="text-sm text-gray-500">
+                {repos.length} repositories
+              </div>
             </div>
             {loading ? (
               <div className="p-6 text-gray-600">Loading…</div>
             ) : repos.length === 0 ? (
-              <div className="p-6 text-gray-500">No repositories match the criteria.</div>
+              <div className="p-6 text-gray-500">
+                No repositories match the criteria.
+              </div>
             ) : (
               <ul className="divide-y divide-gray-200">
                 {repos.map((r) => (
-                  <li key={r.id} className="px-4 py-3 flex items-center justify-between">
+                  <li
+                    key={r.id}
+                    className="px-4 py-3 flex items-center justify-between"
+                  >
                     <div className="min-w-0 mr-4">
-                      <a href={r.html_url} target="_blank" rel="noreferrer" className="font-medium text-blue-600 hover:underline break-words">
+                      <a
+                        href={r.html_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium text-blue-600 hover:underline break-words"
+                      >
                         {r.full_name}
                       </a>
-                      <div className="text-sm text-gray-500 truncate">{r.description}</div>
+                      <div className="text-sm text-gray-500 truncate">
+                        {r.description}
+                      </div>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-600 flex-shrink-0">
                       <span title="Stars">★ {r.stargazers_count}</span>
                       <span>{r.language || "Unknown"}</span>
-                      <span title="Updated at">{new Date(r.updated_at).toLocaleDateString()}</span>
+                      <span title="Updated at">
+                        {new Date(r.updated_at).toLocaleDateString()}
+                      </span>
                     </div>
                   </li>
                 ))}
