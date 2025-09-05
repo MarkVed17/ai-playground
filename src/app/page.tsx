@@ -20,7 +20,7 @@ export default function Home() {
     {
       name: "Forms",
       description: "Multi-step forms with validation",
-      href: "/forms/builder"
+      href: "/forms"
     },
     {
       name: "Data Tables",
