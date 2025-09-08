@@ -9,7 +9,7 @@ import { Slider } from "../../../components/ui/form/Slider";
 import { Select } from "../../../components/ui/form/Select";
 import { Toggle } from "../../../components/ui/form/Toggle";
 import { Button } from "../../../components/ui/button/Button";
-import { Results } from "../../../components/ui/Results";
+import { Results } from "../../../components/ui/form/Results";
 import { Pagination } from "../../../components/ui/Pagination";
 import { LANGUAGE_OPTIONS, SORT_OPTIONS, PER_PAGE } from "../../../lib/constants";
 import { filterRepos, sortRepos } from "../../../lib/utils";
