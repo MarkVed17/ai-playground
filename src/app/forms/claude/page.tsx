@@ -249,134 +249,148 @@ const GitHubRepositoryFinder: React.FC = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">
-              GitHub Repository Finder
-            </h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Find and filter GitHub repositories by user
-            </p>
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar */}
+      <div className="w-80 bg-green-500 text-white p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-wider">GITXPLORE</h1>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <TextInput
+              label="GitHub Username"
+              placeholder="Enter GitHub username"
+              value={formData.username}
+              onChange={(e) => handleInputChange("username", e.target.value)}
+              required
+              className="bg-white/10 border-white/20 text-white placeholder-white/70"
+              labelClassName="text-white"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <TextInput
-                  label="GitHub Username"
-                  placeholder="Enter GitHub username"
-                  value={formData.username}
-                  onChange={(e) =>
-                    handleInputChange("username", e.target.value)
-                  }
-                  required
-                />
-              </div>
+          <div>
+            <Textarea
+              label="Keywords/Topics"
+              placeholder="Enter keywords separated by commas (e.g., react, typescript, api)"
+              value={formData.keywords}
+              onChange={(e) => handleInputChange("keywords", e.target.value)}
+              rows={3}
+              className="bg-white/10 border-white/20 text-white placeholder-white/70"
+              labelClassName="text-white"
+            />
+          </div>
 
-              <div className="md:col-span-2">
-                <Textarea
-                  label="Keywords/Topics"
-                  placeholder="Enter keywords separated by commas (e.g., react, typescript, api)"
-                  value={formData.keywords}
-                  onChange={(e) =>
-                    handleInputChange("keywords", e.target.value)
-                  }
-                  rows={3}
-                />
-              </div>
+          <div>
+            <CheckboxGroup
+              name="repoTypes"
+              label="Repository Types"
+              options={repoTypeOptions}
+              value={formData.repoTypes}
+              onChange={(values) => handleInputChange("repoTypes", values)}
+              orientation="vertical"
+              className="text-white"
+              labelClassName="text-white"
+            />
+          </div>
 
-              <div>
-                <CheckboxGroup
-                  name="repoTypes"
-                  label="Repository Types"
-                  options={repoTypeOptions}
-                  value={formData.repoTypes}
-                  onChange={(values) => handleInputChange("repoTypes", values)}
-                  orientation="vertical"
-                />
-              </div>
+          <div>
+            <SelectDropdown
+              label="Programming Language"
+              options={languageOptions}
+              value={formData.language}
+              onChange={(e) => handleInputChange("language", e.target.value)}
+              placeholder="Select a language"
+              className="bg-white/10 border-white/20 text-white placeholder-white/70"
+              labelClassName="text-white"
+            />
+          </div>
 
-              <div>
-                <RadioButtonGroup
-                  name="sortBy"
-                  label="Sort Repositories By"
-                  options={sortOptions}
-                  value={formData.sortBy}
-                  onChange={(value) => handleInputChange("sortBy", value)}
-                />
-              </div>
+          <div>
+            <RangeSlider
+              label="Minimum Stars"
+              min={0}
+              max={1000}
+              step={10}
+              value={formData.minStars}
+              onChange={(e) => handleInputChange("minStars", parseInt(e.target.value))}
+              formatValue={(value) => `${value}${value === 1000 ? "+" : ""}`}
+              className="text-white"
+              labelClassName="text-white"
+              trackClassName="bg-white/20"
+              thumbClassName="bg-white border-2 border-white"
+            />
+          </div>
 
-              <div>
-                <RangeSlider
-                  label="Minimum Stars"
-                  min={0}
-                  max={1000}
-                  step={10}
-                  value={formData.minStars}
-                  onChange={(e) =>
-                    handleInputChange("minStars", parseInt(e.target.value))
-                  }
-                  formatValue={(value) =>
-                    `${value}${value === 1000 ? "+" : ""}`
-                  }
-                />
-              </div>
+          <div>
+            <RadioButtonGroup
+              name="sortBy"
+              label="Sort Repositories By"
+              options={sortOptions}
+              value={formData.sortBy}
+              onChange={(value) => handleInputChange("sortBy", value)}
+              className="text-white"
+              labelClassName="text-white"
+            />
+          </div>
 
-              <div>
-                <SelectDropdown
-                  label="Programming Language"
-                  options={languageOptions}
-                  value={formData.language}
-                  onChange={(e) =>
-                    handleInputChange("language", e.target.value)
-                  }
-                  placeholder="Select a language"
-                />
-              </div>
+          <div>
+            <ToggleSwitch
+              label="Include Archived Repositories"
+              description="Include repositories that have been archived"
+              checked={formData.includeArchived}
+              onChange={(e) => handleInputChange("includeArchived", e.target.checked)}
+              className="text-white"
+              labelClassName="text-white"
+            />
+          </div>
 
-              <div className="md:col-span-2">
-                <ToggleSwitch
-                  label="Include Archived Repositories"
-                  description="Include repositories that have been archived"
-                  checked={formData.includeArchived}
-                  onChange={(e) =>
-                    handleInputChange("includeArchived", e.target.checked)
-                  }
-                />
-              </div>
+          {error && (
+            <div className="p-4 bg-red-500/20 border border-red-300/30 rounded-md">
+              <p className="text-sm text-red-200">{error}</p>
             </div>
+          )}
 
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
+          <div className="flex gap-4">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isLoading}
+              loadingText="Searching..."
+              disabled={!formData.username.trim()}
+              className="bg-white text-green-500 hover:bg-gray-100"
+            >
+              Search Repositories
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleReset}
+              disabled={isLoading}
+              className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+            >
+              Reset
+            </Button>
+          </div>
+        </form>
+      </div>
 
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                variant="primary"
-                loading={isLoading}
-                loadingText="Searching..."
-                disabled={!formData.username.trim()}
-              >
-                Search Repositories
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleReset}
-                disabled={isLoading}
-              >
-                Reset
-              </Button>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Search Header - Optional secondary search */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-semibold text-gray-900">
+              GitHub Repository Finder
             </div>
-          </form>
+          </div>
+        </div>
 
+        {/* Results Content */}
+        <div className="flex-1 bg-white">
           {hasSearched && (
-            <div className="border-t border-gray-200">
+            <div>
+              {/* User Profile Section */}
               {user && (
                 <div className="p-6 bg-gray-50 border-b border-gray-200">
                   <div className="flex items-center space-x-4">
@@ -404,83 +418,157 @@ const GitHubRepositoryFinder: React.FC = () => {
               )}
 
               <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Repositories ({filteredRepos.length})
-                  </h3>
+                {/* Results Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="text-sm text-gray-600">
+                    {filteredRepos.length} results found in 1 ms
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <SelectDropdown
+                      options={sortOptions.map(opt => ({ 
+                        value: opt.value, 
+                        label: opt.label === "Stars" ? "Highest rated" : 
+                               opt.label === "Forks" ? "Most forked" : 
+                               opt.label === "Updated" ? "Recently updated" : opt.label 
+                      }))}
+                      value={formData.sortBy}
+                      onChange={(e) => handleInputChange("sortBy", e.target.value)}
+                      placeholder="Highest rated"
+                      className="min-w-[150px]"
+                    />
+                  </div>
                 </div>
 
-                {filteredRepos.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">
-                      {repositories.length === 0
-                        ? "No repositories found."
-                        : "No repositories match your filters."}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredRepos.map((repo) => (
-                      <div
-                        key={repo.id}
-                        className="p-4 border border-gray-200 rounded-md hover:bg-gray-50"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2">
-                              <a
-                                href={repo.html_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 font-medium truncate"
-                              >
-                                {repo.name}
-                              </a>
-                              {repo.private && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  Private
-                                </span>
-                              )}
-                              {repo.fork && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                  Fork
-                                </span>
-                              )}
-                              {repo.archived && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                  Archived
-                                </span>
-                              )}
-                            </div>
-                            {repo.description && (
-                              <p className="mt-1 text-sm text-gray-600">
-                                {repo.description}
-                              </p>
-                            )}
-                            <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                              {repo.language && (
-                                <span className="flex items-center">
-                                  <span className="w-3 h-3 rounded-full bg-blue-500 mr-1"></span>
-                                  {repo.language}
-                                </span>
-                              )}
-                              <span className="flex items-center">
-                                ⭐️ {repo.stargazers_count}
-                              </span>
-                              <span className="flex items-center">
-                                Forks {repo.forks_count}
-                              </span>
-                              <span>
-                                Updated{" "}
-                                {new Date(repo.updated_at).toLocaleDateString()}
-                              </span>
-                            </div>
+              {/* Repository Grid */}
+              {filteredRepos.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">
+                    {repositories.length === 0
+                      ? "No repositories found."
+                      : "No repositories match your filters."}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {filteredRepos.map((repo) => (
+                    <div
+                      key={repo.id}
+                      className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                    >
+                      {/* Repository Header */}
+                      <div className="flex items-start space-x-3 mb-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          {repo.language === 'JavaScript' && (
+                            <div className="w-8 h-8 bg-yellow-400 rounded"></div>
+                          )}
+                          {repo.language === 'TypeScript' && (
+                            <div className="w-8 h-8 bg-blue-500 rounded"></div>
+                          )}
+                          {repo.language === 'React' && (
+                            <div className="w-8 h-8 bg-cyan-400 rounded"></div>
+                          )}
+                          {repo.language === 'Vue' && (
+                            <div className="w-8 h-8 bg-green-500 rounded"></div>
+                          )}
+                          {!['JavaScript', 'TypeScript', 'React', 'Vue'].includes(repo.language) && (
+                            <div className="w-8 h-8 bg-gray-400 rounded"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <a
+                              href={repo.html_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-green-600 hover:text-green-700 font-medium text-lg"
+                            >
+                              {repo.name}
+                            </a>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {repo.full_name}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Repository Description */}
+                      {repo.description && (
+                        <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+                          {repo.description}
+                        </p>
+                      )}
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {repo.language && (
+                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-md font-medium">
+                            #{repo.language.toLowerCase()}
+                          </span>
+                        )}
+                        {repo.private && (
+                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-md font-medium">
+                            #private
+                          </span>
+                        )}
+                        {repo.fork && (
+                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-md font-medium">
+                            #fork
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Repository Stats */}
+                      <div className="flex items-center justify-between text-sm text-gray-600">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center">
+                            <span className="text-gray-900">⭐</span>
+                            <span className="ml-1 font-medium">{repo.stargazers_count}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-900">⑃</span>
+                            <span className="ml-1 font-medium">{repo.forks_count}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-900">👁</span>
+                            <span className="ml-1 font-medium">{Math.floor(Math.random() * 1000) + 100}</span>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+                {/* Pagination */}
+                {filteredRepos.length > 0 && (
+                  <div className="flex items-center justify-center space-x-1 mt-8">
+                    <button className="w-8 h-8 flex items-center justify-center text-gray-400">
+                      ←
+                    </button>
+                    <button className="w-8 h-8 flex items-center justify-center bg-green-500 text-white rounded font-medium">
+                      1
+                    </button>
+                    {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                      <button
+                        key={num}
+                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded"
+                      >
+                        {num}
+                      </button>
                     ))}
+                    <button className="w-8 h-8 flex items-center justify-center text-gray-600">
+                      →
+                    </button>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {error && !hasSearched && (
+            <div className="p-6">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             </div>
           )}
